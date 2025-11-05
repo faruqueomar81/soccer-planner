@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Soccer Formation Planner - Mobile Optimized Drag</title>
+<title>Soccer Formation Planner - Mobile Optimized Touch</title>
 <style>
 body {
     background-color: #2b2b2b;
@@ -70,7 +70,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    touch-action: none; /* 💡 Prevent mobile scroll on drag */
+    touch-action: none; /* Prevent mobile scroll while dragging */
 }
 .player {
     width: 60px;
@@ -89,7 +89,7 @@ body {
     position: relative;
     transition: transform 0.05s linear;
     user-select: none;
-    touch-action: none; /* 💡 Prevent default gestures on the player itself */
+    touch-action: none; /* Disable gestures */
 }
 .player span { line-height: 1.2; user-select: none; }
 .delete-btn {
@@ -160,6 +160,22 @@ input, button, select { padding: 5px; margin: 3px; }
 const field = document.getElementById('field');
 const mainPlayerSelect = document.getElementById('mainPlayerSelect');
 
+// Prevent pull-to-refresh when swiping inside the field
+let touchStartY = 0;
+field.addEventListener('touchstart', function(e) {
+    touchStartY = e.touches[0].clientY;
+}, { passive: false });
+
+field.addEventListener('touchmove', function(e) {
+    const touchCurrentY = e.touches[0].clientY;
+    const scrollingDown = touchCurrentY > touchStartY;
+    const atTop = window.scrollY === 0;
+    if (scrollingDown && atTop) {
+        e.preventDefault(); // Block pull-to-refresh
+    }
+}, { passive: false });
+
+// Player data
 let players = [
     { name: 'Asad', number: 11, x: 350, y: 180, subs: [] },
     { name: 'Arman', number: 6, x: 150, y: 280, subs: [] },
@@ -222,7 +238,7 @@ function drawPlayers() {
     });
 }
 
-// *** FIXED Touch/Mobile Dragging ***
+// Touch + Mouse draggable
 function makeTouchOptimizedDraggable(wrapper, playerObj) {
     let startX, startY, isDragging = false;
 
@@ -235,7 +251,7 @@ function makeTouchOptimizedDraggable(wrapper, playerObj) {
         wrapper.style.top = playerObj.y + 'px';
     };
 
-    const onUp = (e) => {
+    const onUp = () => {
         if (!isDragging) return;
         isDragging = false;
         document.removeEventListener('pointermove', onMove);
@@ -247,7 +263,6 @@ function makeTouchOptimizedDraggable(wrapper, playerObj) {
         startX = e.clientX - playerObj.x;
         startY = e.clientY - playerObj.y;
         e.preventDefault();
-
         document.addEventListener('pointermove', onMove, { passive: false });
         document.addEventListener('pointerup', onUp);
     }, { passive: false });
