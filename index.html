@@ -2,83 +2,101 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Soccer Formation Planner - Mobile Follow Finger</title>
+<title>Soccer Formation Planner - Fullscreen</title>
 <style>
-body {
-    background-color: #2b2b2b;
-    display: flex;
-    justify-content: center;
+html, body {
     margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden; /* ⛔ Prevent scrolling */
     font-family: Arial, sans-serif;
+    background-color: #2b2b2b;
 }
-#app { text-align: center; padding: 10px; }
-#controls { margin-bottom: 10px; color: white; }
+
+#app {
+    text-align: center;
+    padding: 10px;
+}
+
+#controls {
+    margin-bottom: 10px;
+    color: white;
+}
+
 #field {
     position: relative;
-    width: 768px;
-    height: 968px;
+    width: 100vw;     /* Full viewport width */
+    height: 100vh;    /* Full viewport height */
     background: repeating-linear-gradient(90deg, #2e7d32, #2e7d32 60px, #388e3c 60px, #388e3c 120px);
     border: 4px solid white;
-    border-radius: 10px;
-    overflow: hidden;
+    box-sizing: border-box;
 }
+
 #watermark {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 120px;
+    font-size: 12vw; /* Scale watermark relative to viewport */
     font-weight: bold;
     color: rgba(255,255,255,0.08);
     pointer-events: none;
     white-space: nowrap;
 }
+
 .line { position: absolute; background: white; }
 .halfway-line { width: 100%; height: 2px; top: 50%; }
 .center-circle {
     position: absolute;
-    width: 150px; height: 150px; border: 2px solid white; border-radius: 50%;
-    top: calc(50% - 75px); left: calc(50% - 75px);
+    width: 20vw; height: 20vw;
+    border: 2px solid white; border-radius: 50%;
+    top: calc(50% - 10vw); left: calc(50% - 10vw);
 }
 .center-spot {
     position: absolute;
-    width: 6px; height: 6px; background: white; border-radius: 50%;
-    top: calc(50% - 3px); left: calc(50% - 3px);
+    width: 0.6vw; height: 0.6vw;
+    background: white; border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
 }
+
+/* Penalty box & goal area scaled */
 .penalty-box {
     border: 2px solid white; position: absolute;
-    width: 360px; height: 180px; left: calc(50% - 180px);
+    width: 45vw; height: 18vh; left: calc(50% - 22.5vw);
 }
 .goal-area {
     border: 2px solid white; position: absolute;
-    width: 160px; height: 80px; left: calc(50% - 80px);
+    width: 20vw; height: 8vh; left: calc(50% - 10vw);
 }
 .penalty-spot {
-    position: absolute;
-    width: 6px; height: 6px; background: white; border-radius: 50%;
-    left: calc(50% - 3px);
+    position: absolute; width: 0.6vw; height: 0.6vw;
+    background: white; border-radius: 50%;
+    left: 50%; transform: translateX(-50%);
 }
 .top-box { top: 0; }
 .top-goal { top: 0; }
-.top-spot { top: 120px; }
+.top-spot { top: 12vh; }
 .bottom-box { bottom: 0; }
 .bottom-goal { bottom: 0; }
-.bottom-spot { bottom: 120px; }
+.bottom-spot { bottom: 12vh; }
+
 .player-wrapper {
     position: absolute;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
+
 .player {
-    width: 60px;
-    height: 60px;
+    width: 6vw;
+    height: 6vw;
     background: red;
     border-radius: 50%;
     text-align: center;
     color: white;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 1vw;
     cursor: grab;
     display: flex;
     flex-direction: column;
@@ -88,60 +106,53 @@ body {
     transition: transform 0.05s linear;
     user-select: none;
 }
-.player span { line-height: 1.2; user-select: none; }
+.player span {
+    line-height: 1.2;
+    user-select: none;
+}
+
 .delete-btn {
-    position: absolute; top: -5px; right: -5px;
+    position: absolute; top: -0.5vw; right: -0.5vw;
     background: white; color: red;
-    border-radius: 50%; width: 16px; height: 16px;
-    font-size: 12px; line-height: 14px; text-align: center;
-    cursor: pointer;
-    user-select: none;
-}
-.subbox {
-    width: 80px; background: white; color: black;
-    font-size: 10px; text-align: center; margin-top: 3px;
-    border-radius: 3px; padding: 2px;
-    box-shadow: 0 0 3px rgba(0,0,0,0.3);
-    position: relative;
-    user-select: none;
-}
-.sub-delete {
-    position: absolute; top: 2px; right: 2px;
-    background: red; color: white;
-    border-radius: 50%; width: 12px; height: 12px;
-    font-size: 10px; line-height: 12px;
+    border-radius: 50%; width: 1.5vw; height: 1.5vw;
+    font-size: 1vw; line-height: 1.4vw;
     text-align: center; cursor: pointer;
     user-select: none;
 }
-input, button, select { padding: 5px; margin: 3px; }
+
+.subbox {
+    width: 8vw; background: white; color: black;
+    font-size: 0.9vw; text-align: center; margin-top: 0.3vw;
+    border-radius: 0.3vw; padding: 0.2vw;
+    box-shadow: 0 0 3px rgba(0,0,0,0.3);
+    position: relative; user-select: none;
+}
+
+.sub-delete {
+    position: absolute; top: 0.2vw; right: 0.2vw;
+    background: red; color: white;
+    border-radius: 50%; width: 1vw; height: 1vw;
+    font-size: 0.7vw; line-height: 1vw;
+    text-align: center; cursor: pointer;
+    user-select: none;
+}
 
 /* Bigger circles for mobile */
 @media (max-width: 768px) {
     .player {
-        width: 80px;
-        height: 80px;
-        font-size: 16px;
+        width: 12vw;
+        height: 12vw;
+        font-size: 2vw;
     }
     .subbox {
-        width: 100px;
-        font-size: 12px;
+        width: 14vw;
+        font-size: 2vw;
     }
 }
 </style>
 </head>
 <body>
 <div id="app">
-    <div id="controls">
-        <h3>Main Player</h3>
-        <input type="text" id="playerName" placeholder="Player Name">
-        <input type="number" id="playerNumber" placeholder="Number">
-        <button onclick="addPlayer()">Add Player</button>
-        <h3>Sub Player</h3>
-        <input type="text" id="subName" placeholder="Sub Player Name">
-        <input type="number" id="subNumber" placeholder="Number">
-        <select id="mainPlayerSelect"></select>
-        <button onclick="addSub()">Add Sub</button>
-    </div>
     <div id="field">
         <div id="watermark">KICKS</div>
         <div class="line halfway-line"></div>
@@ -158,136 +169,9 @@ input, button, select { padding: 5px; margin: 3px; }
 
 <script>
 const field = document.getElementById('field');
-const mainPlayerSelect = document.getElementById('mainPlayerSelect');
 
-// Formation positions
+// Initial players at percentage positions
 let players = [
-    { name: 'Asad', number: 11, x: 350, y: 180, subs: [] },
-    { name: 'Arman', number: 6, x: 150, y: 280, subs: [] },
-    { name: 'Waamik', number: 10, x: 260, y: 280, subs: [] },
-    { name: 'Ayon', number: 8, x: 350, y: 330, subs: [] },
-    { name: 'Yamin', number: 7, x: 440, y: 280, subs: [] },
-    { name: 'Amin', number: 9, x: 560, y: 280, subs: [] },
-    { name: 'Rushil/Jareer', number: 2, x: 150, y: 460, subs: [] },
-    { name: 'Sami', number: 3, x: 260, y: 460, subs: [] },
-    { name: 'Dolon', number: 4, x: 440, y: 460, subs: [] },
-    { name: 'Raiyan', number: 5, x: 560, y: 460, subs: [] },
-    { name: 'Doza', number: 1, x: 350, y: 660, subs: [] }
-];
-
-function updatePlayerDropdown() {
-    mainPlayerSelect.innerHTML = '';
-    players.forEach((p, idx) => {
-        const opt = document.createElement('option');
-        opt.value = idx;
-        opt.textContent = `${p.number} - ${p.name}`;
-        mainPlayerSelect.appendChild(opt);
-    });
-}
-
-function drawPlayers() {
-    document.querySelectorAll('.player-wrapper').forEach(e => e.remove());
-    players.forEach((p, idx) => {
-        const wrapper = document.createElement('div');
-        wrapper.classList.add('player-wrapper');
-        wrapper.style.left = p.x + 'px';
-        wrapper.style.top = p.y + 'px';
-
-        const mainEl = document.createElement('div');
-        mainEl.classList.add('player');
-        mainEl.innerHTML = `<span>${p.number}</span><span>${p.name}</span>`;
-
-        const delBtn = document.createElement('div');
-        delBtn.classList.add('delete-btn');
-        delBtn.textContent = '×';
-        delBtn.onclick = (e) => { e.stopPropagation(); deletePlayer(idx); };
-        mainEl.appendChild(delBtn);
-
-        makeMobileFriendlyDraggable(wrapper, p);
-        wrapper.appendChild(mainEl);
-
-        p.subs.slice(0, 3).forEach((sub, subIdx) => {
-            const subEl = document.createElement('div');
-            subEl.classList.add('subbox');
-            subEl.textContent = `${sub.number} - ${sub.name}`;
-            const subDel = document.createElement('div');
-            subDel.classList.add('sub-delete');
-            subDel.textContent = '×';
-            subDel.onclick = (e) => { e.stopPropagation(); deleteSub(idx, subIdx); };
-            subEl.appendChild(subDel);
-            wrapper.appendChild(subEl);
-        });
-
-        field.appendChild(wrapper);
-    });
-}
-
-// 📱 Mobile-friendly drag: follows finger even if not centered exactly
-function makeMobileFriendlyDraggable(wrapper, playerObj) {
-    let isDragging = false;
-
-    wrapper.addEventListener('pointerdown', e => {
-        isDragging = true;
-        wrapper.setPointerCapture(e.pointerId);
-    });
-
-    wrapper.addEventListener('pointermove', e => {
-        if (!isDragging) return;
-        // Move circle so its center follows the finger
-        const circleSize = wrapper.querySelector('.player').offsetWidth;
-        playerObj.x = e.clientX - circleSize / 2;
-        playerObj.y = e.clientY - circleSize / 2;
-        wrapper.style.left = playerObj.x + 'px';
-        wrapper.style.top = playerObj.y + 'px';
-
-        // Auto scroll when near edges
-        const buffer = 50;
-        if (e.clientY < buffer) window.scrollBy(0, -10);
-        if (window.innerHeight - e.clientY < buffer) window.scrollBy(0, 10);
-    });
-
-    wrapper.addEventListener('pointerup', e => {
-        isDragging = false;
-        wrapper.releasePointerCapture(e.pointerId);
-    });
-}
-
-function addPlayer() {
-    const name = document.getElementById('playerName').value.trim();
-    const num = document.getElementById('playerNumber').value.trim();
-    if (!name || !num) { alert("Please enter both name and number"); return; }
-    players.push({ name: name, number: num, x: 350, y: 400, subs: [] });
-    document.getElementById('playerName').value = '';
-    document.getElementById('playerNumber').value = '';
-    updatePlayerDropdown();
-    drawPlayers();
-}
-
-function addSub() {
-    const subName = document.getElementById('subName').value.trim();
-    const subNum = document.getElementById('subNumber').value.trim();
-    const mainIdx = mainPlayerSelect.value;
-    if (!subName || !subNum || mainIdx === '') { alert("Enter sub details."); return; }
-    if (players[mainIdx].subs.length >= 3) { alert("Max 3 subs!"); return; }
-    players[mainIdx].subs.push({ name: subName, number: subNum });
-    document.getElementById('subName').value = '';
-    document.getElementById('subNumber').value = '';
-    drawPlayers();
-}
-
-function deletePlayer(playerIdx) {
-    players.splice(playerIdx, 1);
-    updatePlayerDropdown();
-    drawPlayers();
-}
-
-function deleteSub(playerIdx, subIdx) {
-    players[playerIdx].subs.splice(subIdx, 1);
-    drawPlayers();
-}
-
-updatePlayerDropdown();
-drawPlayers();
-</script>
-</body>
-</html>
+    { name: 'Asad', number: 11, x: 45, y: 18, subs: [] },
+    { name: 'Arman', number: 6, x: 20, y: 28, subs: [] },
+    { name: 'Waamik
