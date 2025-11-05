@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Soccer Formation Planner - Mobile Optimized Drag</title>
 <style>
-/* --- same styles from previous stable code --- */
 body {
     background-color: #2b2b2b;
     display: flex;
@@ -65,11 +64,13 @@ body {
 .bottom-box { bottom: 0; }
 .bottom-goal { bottom: 0; }
 .bottom-spot { bottom: 120px; }
+
 .player-wrapper {
     position: absolute;
     display: flex;
     flex-direction: column;
     align-items: center;
+    touch-action: none; /* 💡 Prevent mobile scroll on drag */
 }
 .player {
     width: 60px;
@@ -88,6 +89,7 @@ body {
     position: relative;
     transition: transform 0.05s linear;
     user-select: none;
+    touch-action: none; /* 💡 Prevent default gestures on the player itself */
 }
 .player span { line-height: 1.2; user-select: none; }
 .delete-btn {
@@ -115,8 +117,6 @@ body {
     user-select: none;
 }
 input, button, select { padding: 5px; margin: 3px; }
-
-/* Bigger circles for mobile */
 @media (max-width: 768px) {
     .player {
         width: 80px;
@@ -156,12 +156,10 @@ input, button, select { padding: 5px; margin: 3px; }
         <div class="penalty-spot bottom-spot"></div>
     </div>
 </div>
-
 <script>
 const field = document.getElementById('field');
 const mainPlayerSelect = document.getElementById('mainPlayerSelect');
 
-// Initial player data
 let players = [
     { name: 'Asad', number: 11, x: 350, y: 180, subs: [] },
     { name: 'Arman', number: 6, x: 150, y: 280, subs: [] },
@@ -205,6 +203,7 @@ function drawPlayers() {
         mainEl.appendChild(delBtn);
 
         makeTouchOptimizedDraggable(wrapper, p);
+
         wrapper.appendChild(mainEl);
 
         p.subs.slice(0, 3).forEach((sub, subIdx) => {
@@ -223,34 +222,35 @@ function drawPlayers() {
     });
 }
 
-// **Touch + Mouse**
+// *** FIXED Touch/Mobile Dragging ***
 function makeTouchOptimizedDraggable(wrapper, playerObj) {
     let startX, startY, isDragging = false;
 
-    // Pointer down (mouse+touch)
-    wrapper.addEventListener('pointerdown', e => {
-        isDragging = true;
-        startX = e.clientX - playerObj.x;
-        startY = e.clientY - playerObj.y;
-        wrapper.setPointerCapture(e.pointerId);
-        e.preventDefault(); // Stops default scroll
-    }, { passive: false });
-
-    // Move
-    wrapper.addEventListener('pointermove', e => {
+    const onMove = (e) => {
         if (!isDragging) return;
-        e.preventDefault(); // stops unwanted scrolling
+        e.preventDefault();
         playerObj.x = e.clientX - startX;
         playerObj.y = e.clientY - startY;
         wrapper.style.left = playerObj.x + 'px';
         wrapper.style.top = playerObj.y + 'px';
-    }, { passive: false });
+    };
 
-    // Pointer up
-    wrapper.addEventListener('pointerup', e => {
+    const onUp = (e) => {
+        if (!isDragging) return;
         isDragging = false;
-        wrapper.releasePointerCapture(e.pointerId);
-    });
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+    };
+
+    wrapper.addEventListener('pointerdown', e => {
+        isDragging = true;
+        startX = e.clientX - playerObj.x;
+        startY = e.clientY - playerObj.y;
+        e.preventDefault();
+
+        document.addEventListener('pointermove', onMove, { passive: false });
+        document.addEventListener('pointerup', onUp);
+    }, { passive: false });
 }
 
 function addPlayer() {
@@ -287,7 +287,6 @@ function deleteSub(playerIdx, subIdx) {
     drawPlayers();
 }
 
-// Init
 updatePlayerDropdown();
 drawPlayers();
 </script>
