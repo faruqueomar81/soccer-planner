@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Soccer Formation Planner - Smooth Drag + KICKS Watermark</title>
+<title>Soccer Formation Planner - Mobile Optimized Drag</title>
 <style>
+/* --- same styles from previous stable code --- */
 body {
     background-color: #2b2b2b;
     display: flex;
@@ -22,7 +23,6 @@ body {
     border-radius: 10px;
     overflow: hidden;
 }
-/* Faint centered watermark */
 #watermark {
     position: absolute;
     top: 50%;
@@ -34,7 +34,6 @@ body {
     pointer-events: none;
     white-space: nowrap;
 }
-/* Pitch markings */
 .line { position: absolute; background: white; }
 .halfway-line { width: 100%; height: 2px; top: 50%; }
 .center-circle {
@@ -66,7 +65,6 @@ body {
 .bottom-box { bottom: 0; }
 .bottom-goal { bottom: 0; }
 .bottom-spot { bottom: 120px; }
-/* Player styles */
 .player-wrapper {
     position: absolute;
     display: flex;
@@ -163,6 +161,7 @@ input, button, select { padding: 5px; margin: 3px; }
 const field = document.getElementById('field');
 const mainPlayerSelect = document.getElementById('mainPlayerSelect');
 
+// Initial player data
 let players = [
     { name: 'Asad', number: 11, x: 350, y: 180, subs: [] },
     { name: 'Arman', number: 6, x: 150, y: 280, subs: [] },
@@ -205,7 +204,7 @@ function drawPlayers() {
         delBtn.onclick = (e) => { e.stopPropagation(); deletePlayer(idx); };
         mainEl.appendChild(delBtn);
 
-        makeSmoothDraggable(wrapper, p);
+        makeTouchOptimizedDraggable(wrapper, p);
         wrapper.appendChild(mainEl);
 
         p.subs.slice(0, 3).forEach((sub, subIdx) => {
@@ -224,29 +223,33 @@ function drawPlayers() {
     });
 }
 
-function makeSmoothDraggable(wrapper, playerObj) {
+// **Touch + Mouse**
+function makeTouchOptimizedDraggable(wrapper, playerObj) {
     let startX, startY, isDragging = false;
+
+    // Pointer down (mouse+touch)
     wrapper.addEventListener('pointerdown', e => {
         isDragging = true;
-        wrapper.style.transition = 'none';
         startX = e.clientX - playerObj.x;
         startY = e.clientY - playerObj.y;
         wrapper.setPointerCapture(e.pointerId);
-    });
+        e.preventDefault(); // Stops default scroll
+    }, { passive: false });
+
+    // Move
     wrapper.addEventListener('pointermove', e => {
         if (!isDragging) return;
+        e.preventDefault(); // stops unwanted scrolling
         playerObj.x = e.clientX - startX;
         playerObj.y = e.clientY - startY;
         wrapper.style.left = playerObj.x + 'px';
         wrapper.style.top = playerObj.y + 'px';
-        const buffer = 50;
-        if (e.clientY < buffer) window.scrollBy(0, -10);
-        if (window.innerHeight - e.clientY < buffer) window.scrollBy(0, 10);
-    });
+    }, { passive: false });
+
+    // Pointer up
     wrapper.addEventListener('pointerup', e => {
         isDragging = false;
         wrapper.releasePointerCapture(e.pointerId);
-        wrapper.style.transition = 'transform 0.05s linear';
     });
 }
 
